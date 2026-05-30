@@ -38,10 +38,8 @@ int main(int argc, char* argv[]) {
     gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress);
     glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 
-    unsigned int shader = loadShader("shaders/vertex.glsl", "shaders/fragment.glsl");
-
-    unsigned int texture = loadTexture("assets/textures/texture.jpg");
-
+    Shader shader("shaders/vertex.glsl", "shaders/fragment.glsl");
+    Texture texture("assets/textures/texture.jpg");
     // Вершины треугольника
     float vertices[] = {
         // x      y      z     u     v
@@ -108,13 +106,12 @@ int main(int argc, char* argv[]) {
         glClear(GL_COLOR_BUFFER_BIT);
 
         // Используем скомпилированные шейдеры
-        glUseProgram(shader);
+        shader.use();
 
         // Используем текстуру
-        glBindTexture(GL_TEXTURE_2D, texture);
+        texture.bind();
 
-        int uni_loc = glGetUniformLocation(shader, "screen_aspect");
-        glUniform1f(uni_loc, aspect);
+        shader.setFloat("screen_aspect", aspect);
 
         glBindVertexArray(VAO);
 
@@ -127,7 +124,6 @@ int main(int argc, char* argv[]) {
 
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
-    glDeleteProgram(shader);
     SDL_GL_DeleteContext(context);
     SDL_DestroyWindow(window);
     SDL_Quit();
