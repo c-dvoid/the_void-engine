@@ -1,25 +1,23 @@
-
 #include <glad/glad.h>
 #include <SDL2/SDL.h>
 
+#include "Camera.h"
+#include "Renderer.h"
 #include "Shader.h"
-#include "Texture.h"
+#include "Scene.h"
+#include "SceneLoader.h"
 
+#include <iostream>
 
 const int SCREEN_WIDTH = 800;
 const int SCREEN_HEIGHT = 600;
 
-
 int main(int argc, char* argv[]) {
-
-    // Инициализация SDL
     SDL_Init(SDL_INIT_VIDEO);
-    // Говорим SDL что хотим OpenGL 3.3
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 
-    // Создаём окно
     SDL_Window* window = SDL_CreateWindow(
         "My Game",
         SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
@@ -27,65 +25,28 @@ int main(int argc, char* argv[]) {
         SDL_WINDOW_OPENGL
     );
 
-    int window_Width = 0;
-    int window_Height = 0;
+    int window_Width = SCREEN_WIDTH;
+    int window_Height = SCREEN_HEIGHT;
 
-    SDL_GetWindowSize(window, &window_Width, &window_Height);
-
-
-    // Создаём OpenGL контекст + Инициализируем GLAD
     SDL_GLContext context = SDL_GL_CreateContext(window);
     gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress);
     glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 
-    Shader shader("shaders/vertex.glsl", "shaders/fragment.glsl");
-    Texture texture("assets/textures/texture.jpg");
-    // Вершины треугольника
-    float vertices[] = {
-        // x      y      z     u     v
-        0.5f,  0.5f,  0.0f,  1.0f, 1.0f,  // top right
-        0.5f, -0.5f,  0.0f,  1.0f, 0.0f,  // bottom right
-       -0.5f, -0.5f,  0.0f,  0.0f, 0.0f,  // bottom left
-       -0.5f,  0.5f,  0.0f,  0.0f, 1.0f   // top left
-   };
+    Camera camera;
+    Renderer renderer(SCREEN_WIDTH, SCREEN_HEIGHT);
+    Shader landscape_shader("shaders/landscape_vertex.glsl", "shaders/landscape_fragment.glsl");
 
-    unsigned int indices[] = {
-        0, 1, 3, // first triangle
-        1, 2, 3  // second triangle
-    };
+    Scene* scene = SceneLoader::load("scenes/level1.map");
+    camera.position = scene->spawnPoint;
 
-    // VAO + VBO + EBO(for rectangles or to save memory, specifically)
-    unsigned int VAO, VBO, EBO;
-    glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO);
-    glGenBuffers(1, &EBO);
-
-    glBindVertexArray(VAO);
-
-    // VBO
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-
-    // UV — атрибут 1, 2 числа, шаг 5 floats, смещение 3 floats
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-    glEnableVertexAttribArray(1);
-
-    // EBO
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
-    // Отвязываем VBO
-    glBindVertexArray(0);
-
-    // Главный цикл
     bool running = true;
     SDL_Event event;
+    float lastFrame = 0.0f;
+    float deltaTime = 0.0f;
+
+    SDL_SetRelativeMouseMode(SDL_TRUE);
 
     while (running) {
-        // Обработка событий
         while (SDL_PollEvent(&event)) {
             if (event.type == SDL_QUIT) running = false;
             if (event.type == SDL_KEYDOWN)
@@ -96,34 +57,56 @@ int main(int argc, char* argv[]) {
                     window_Height = event.window.data2;
                     glViewport(0, 0, window_Width, window_Height);
                 }
+            if (event.type == SDL_MOUSEMOTION)
+                camera.processMouse(event.motion.xrel, -event.motion.yrel);
         }
 
-        float aspect = (float)window_Height / window_Width;
+        const Uint8* keys = SDL_GetKeyboardState(NULL);
+        camera.processKeyboard(
+            deltaTime,
+            keys[SDL_SCANCODE_W],
+            keys[SDL_SCANCODE_S],
+            keys[SDL_SCANCODE_A],
+            keys[SDL_SCANCODE_D]
+        );
 
+        float currentFrame = SDL_GetTicks() / 1000.0f;
+        deltaTime = currentFrame - lastFrame;
+        lastFrame = currentFrame;
 
-        // Очищаем экран тёмно-синим цветом
-        glClearColor(0.1f, 0.1f, 0.2f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
+        scene->update(camera.position, [&](std::string action, std::string parameter) {
+            if (action == "next_level") {
+                delete scene;
+                scene = SceneLoader::load("scenes/" + parameter);
+                camera.position = scene->spawnPoint;
+            }
+            if (action == "show_text") {
+                std::cout << parameter << std::endl;
+            }
+        });
 
-        // Используем скомпилированные шейдеры
-        shader.use();
+        renderer.beginFrame();
 
-        // Используем текстуру
-        texture.bind();
+        landscape_shader.use();
+        landscape_shader.setVec3("lightPos",
+            scene->light.position.x,
+            scene->light.position.y,
+            scene->light.position.z);
+        landscape_shader.setVec3("lightColor",
+            scene->light.color.x,
+            scene->light.color.y,
+            scene->light.color.z);
+        landscape_shader.setVec3("viewPos",
+            camera.position.x,
+            camera.position.y,
+            camera.position.z);
+        renderer.applyMatrices(landscape_shader, glm::mat4(1.0f), camera);
+        scene->draw(landscape_shader);
 
-        shader.setFloat("screen_aspect", aspect);
-
-        glBindVertexArray(VAO);
-
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-
-        // Показываем кадр
-        SDL_GL_SwapWindow(window);
+        renderer.endFrame(window);
     }
-    // Очистка
 
-    glDeleteVertexArrays(1, &VAO);
-    glDeleteBuffers(1, &VBO);
+    delete scene;
     SDL_GL_DeleteContext(context);
     SDL_DestroyWindow(window);
     SDL_Quit();
