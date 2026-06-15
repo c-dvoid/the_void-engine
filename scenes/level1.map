@@ -1,0 +1,9 @@
+# level1.map
+ambient 0.6
+light 5.0 10.0 5.0
+spawn 0.0 1.0 3.0
+
+model assets/models/landscape/terrain.glb  0.0  0.0  0.0  10.0
+
+trigger  0.0  1.0  3.0  radius:2.0  action:show_text  You entered the zone
+trigger  10.0  1.0  0.0  radius:2.0  action:show_text  You came to the point B
