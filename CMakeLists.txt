@@ -25,6 +25,8 @@ add_executable(Test
         Scene.cpp
         SceneLoader.h
         SceneLoader.cpp
+        collision.h
+        Collision.cpp
 )
 
 target_link_libraries(Test
