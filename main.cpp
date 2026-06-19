@@ -34,7 +34,7 @@ int main(int argc, char* argv[]) {
 
     Camera camera;
     Renderer renderer(SCREEN_WIDTH, SCREEN_HEIGHT);
-    Shader landscape_shader("shaders/landscape_vertex.glsl", "shaders/landscape_fragment.glsl");
+    Shader shader("shaders/landscape_vertex.glsl", "shaders/landscape_fragment.glsl");
 
     Scene* scene = SceneLoader::load("scenes/level1.map");
     camera.position = scene->spawnPoint;
@@ -87,21 +87,21 @@ int main(int argc, char* argv[]) {
 
         renderer.beginFrame();
 
-        landscape_shader.use();
-        landscape_shader.setVec3("lightPos",
+        shader.use();
+        shader.setVec3("lightPos",
             scene->light.position.x,
             scene->light.position.y,
             scene->light.position.z);
-        landscape_shader.setVec3("lightColor",
+        shader.setVec3("lightColor",
             scene->light.color.x,
             scene->light.color.y,
             scene->light.color.z);
-        landscape_shader.setVec3("viewPos",
+        shader.setVec3("viewPos",
             camera.position.x,
             camera.position.y,
             camera.position.z);
-        renderer.applyMatrices(landscape_shader, glm::mat4(1.0f), camera);
-        scene->draw(landscape_shader);
+        renderer.applyMatrices(shader, glm::mat4(1.0f), camera);
+        scene->draw(shader);
 
         renderer.endFrame(window);
     }
