@@ -42,10 +42,13 @@ Scene* SceneLoader::load(const std::string& path) {
         else if (type == "model") {
             std::string modelPath;
             float x, y, z, scale;
-            ss >> modelPath >> x >> y >> z >> scale;
+            float r, g, b;
+            ss >> modelPath >> x >> y >> z >> scale >> r >> g >> b;
 
             SceneObject obj;
             obj.mesh = new Mesh(modelPath);
+            obj.color = glm::vec3(r, g, b); // Серый по умолчанию
+            obj.hasTexture = false;
 
             glm::mat4 transform = glm::mat4(1.0f);
             transform = glm::translate(transform, glm::vec3(x, y, z));
