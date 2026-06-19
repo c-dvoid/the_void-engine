@@ -14,6 +14,8 @@
 struct SceneObject {
     Mesh* mesh;
     glm::mat4 transform;
+    glm::vec3 color;
+    bool hasTexture;
 };
 
 struct Trigger {

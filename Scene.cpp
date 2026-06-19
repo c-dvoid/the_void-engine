@@ -32,6 +32,8 @@ void Scene::update(glm::vec3 playerPos,
 void Scene::draw(Shader& shader) {
     for (auto& obj : objects) {
         shader.setMat4("model", obj.transform);
+        shader.setVec3("baseColor", obj.color.x, obj.color.y, obj.color.z);
+        shader.setBool("hasTexture", obj.hasTexture);
         obj.mesh->draw(shader);
     }
 }
