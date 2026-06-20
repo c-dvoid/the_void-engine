@@ -10,7 +10,7 @@
 static std::string readFile(const char* path) {
     std::ifstream file(path);
     if (!file.is_open()) {
-        std::cout << "Не удалось открыть шейдер: " << path << std::endl;
+        std::cout << "Failed to open up shader: " << path << std::endl;
         return "";
     }
     std::stringstream buffer;
@@ -28,7 +28,7 @@ static unsigned int compileShader(const char* source, GLenum type) {
     glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
     if (!success) {
         glGetShaderInfoLog(shader, 512, NULL, log);
-        std::cout << "Ошибка шейдера: " << log << std::endl;
+        std::cout << "Shader mistake: " << log << std::endl;
     }
     return shader;
 }
@@ -53,7 +53,7 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath) {
     glGetProgramiv(ID, GL_LINK_STATUS, &success);
     if (!success) {
         glGetProgramInfoLog(ID, 512, NULL, log);
-        std::cout << "Ошибка линковки: " << log << std::endl;
+        std::cout << "Link-ovka mistake: " << log << std::endl;
     }
 
     glDeleteShader(vert);
