@@ -10,6 +10,7 @@
 
 #include "Mesh.h"
 #include "Shader.h"
+#include "NPC.h"
 
 struct SceneObject {
     Mesh* mesh;
@@ -34,6 +35,7 @@ struct SceneLight {
 class Scene {
 public:
     std::vector<SceneObject> objects;
+    std::vector<NPC*>        npcs;
     std::vector<Trigger>     triggers;
     SceneLight               light;
     glm::vec3                spawnPoint;
@@ -43,6 +45,6 @@ public:
     Scene();
     ~Scene();
 
-    void update(glm::vec3 playerPos, std::function<void(std::string, std::string)> onTrigger);
+    void update(float deltaTime, glm::vec3 playerPos, std::function<void(std::string, std::string)> onTrigger);
     void draw(Shader& shader);
 };

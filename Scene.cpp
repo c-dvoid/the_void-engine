@@ -11,13 +11,16 @@ Scene::Scene() {
 }
 
 Scene::~Scene() {
-    for (auto& obj : objects) {
-        delete obj.mesh;
-    }
+    for (auto& obj : objects) delete obj.mesh;
+    for (auto& npc : npcs) delete npc;
 }
 
-void Scene::update(glm::vec3 playerPos,
+void Scene::update(float deltaTime, glm::vec3 playerPos,
     std::function<void(std::string, std::string)> onTrigger) {
+    // Обновляем NPC
+    for (auto& npc : npcs) npc->update(deltaTime);
+
+    // Проверяем триггеры
     for (auto& trigger : triggers) {
         if (trigger.activated) continue;
 
@@ -30,10 +33,14 @@ void Scene::update(glm::vec3 playerPos,
 }
 
 void Scene::draw(Shader& shader) {
+    // Объекты сцены
     for (auto& obj : objects) {
         shader.setMat4("model", obj.transform);
         shader.setVec3("baseColor", obj.color.x, obj.color.y, obj.color.z);
         shader.setBool("hasTexture", obj.hasTexture);
         obj.mesh->draw(shader);
     }
+
+    // NPC
+    for (auto& npc : npcs) npc->draw(shader);
 }
