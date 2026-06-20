@@ -1,9 +1,10 @@
 
 #pragma once
+#include <glm/glm.hpp>
 
 struct AABB {
-    float x, y;
-    float w, h;
+    glm::vec3 min;
+    glm::vec3 max;
 };
 
 bool intersect(const AABB& a, const AABB& b);
