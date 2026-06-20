@@ -1,9 +1,21 @@
 # level1.map
 ambient 0.6
-light 5.0 10.0 5.0
+light 0.0 50.0 0.0
 spawn 0.0 1.0 3.0
 
-model assets/models/landscape/terrain.glb  0.0  0.0  0.0  10.0
+model assets/models/terrain.obj   0.0  0.0  0.0  10.0  0.5 0.5 0.5
 
-trigger  0.0  1.0  3.0  radius:2.0  action:show_text  You entered the zone
-trigger  10.0  1.0  0.0  radius:2.0  action:show_text  You came to the point B
+npc  assets/models/capsule.obj  2.0  0.5  0.0  0.2 0.4 0.8
+speed 1.5
+waypoint  2.0  0.5   0.0
+waypoint  5.0  0.5   0.0
+waypoint  5.0  0.5  -3.0
+waypoint  2.0  0.5  -3.0
+end_npc
+
+npc  assets/models/capsule.obj  -2.0  0.5  0.0  0.8 0.2 0.2
+speed 1.0
+waypoint  -2.0  0.5   0.0
+waypoint  -5.0  0.5   0.0
+waypoint  -5.0  0.5  -3.0
+end_npc
