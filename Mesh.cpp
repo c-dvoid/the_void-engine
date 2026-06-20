@@ -27,6 +27,8 @@ Mesh::Mesh(const std::string& path) {
 
     processNode(scene->mRootNode, scene, vertices, indices);
     setup(vertices, indices);
+
+    std::cout << "Mesh loaded: " << path << " vertices: " << indexCount << std::endl;
 }
 
 unsigned int Mesh::loadTexture(const aiScene* scene, int textureIndex) {
@@ -168,9 +170,9 @@ void Mesh::draw(Shader& shader) {
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, textureIDs[0]);
         shader.setInt("ourTexture", 0);
-    } else {
-        std::cout << "No textures loaded!" << std::endl;
-    }
+    } //else {
+        //std::cout << "No textures loaded!" << std::endl;
+    //}
 
     glBindVertexArray(VAO);
     glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, 0);
