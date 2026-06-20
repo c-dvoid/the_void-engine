@@ -2,6 +2,7 @@
 #include <SDL2/SDL.h>
 
 #include "Camera.h"
+#include "Player.h"
 #include "Renderer.h"
 #include "Shader.h"
 #include "Scene.h"
@@ -32,12 +33,12 @@ int main(int argc, char* argv[]) {
     gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress);
     glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 
-    Camera camera;
+    Player player;
     Renderer renderer(SCREEN_WIDTH, SCREEN_HEIGHT);
     Shader shader("shaders/landscape_vertex.glsl", "shaders/landscape_fragment.glsl");
 
     Scene* scene = SceneLoader::load("scenes/level1.map");
-    camera.position = scene->spawnPoint;
+    player.camera.position = scene->spawnPoint;
 
     bool running = true;
     SDL_Event event;
@@ -58,32 +59,27 @@ int main(int argc, char* argv[]) {
                     glViewport(0, 0, window_Width, window_Height);
                 }
             if (event.type == SDL_MOUSEMOTION)
-                camera.processMouse(event.motion.xrel, -event.motion.yrel);
+                player.processMouse(event.motion.xrel, -event.motion.yrel);
         }
 
         const Uint8* keys = SDL_GetKeyboardState(NULL);
-        camera.processKeyboard(
-            deltaTime,
-            keys[SDL_SCANCODE_W],
-            keys[SDL_SCANCODE_S],
-            keys[SDL_SCANCODE_A],
-            keys[SDL_SCANCODE_D]
-        );
 
         float currentFrame = SDL_GetTicks() / 1000.0f;
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
 
-        scene->update(camera.position, [&](std::string action, std::string parameter) {
+        scene->update(deltaTime, player.getPosition(), [&](std::string action, std::string parameter) {
             if (action == "next_level") {
                 delete scene;
                 scene = SceneLoader::load("scenes/" + parameter);
-                camera.position = scene->spawnPoint;
+                player.getPosition() = scene->spawnPoint;
             }
             if (action == "show_text") {
                 std::cout << parameter << std::endl;
             }
         });
+
+        player.update(deltaTime, keys, scene);
 
         renderer.beginFrame();
 
@@ -97,10 +93,10 @@ int main(int argc, char* argv[]) {
             scene->light.color.y,
             scene->light.color.z);
         shader.setVec3("viewPos",
-            camera.position.x,
-            camera.position.y,
-            camera.position.z);
-        renderer.applyMatrices(shader, glm::mat4(1.0f), camera);
+            player.camera.position.x,
+            player.camera.position.y,
+            player.camera.position.z);
+        renderer.applyMatrices(shader, glm::mat4(1.0f), player.camera);
         scene->draw(shader);
 
         renderer.endFrame(window);

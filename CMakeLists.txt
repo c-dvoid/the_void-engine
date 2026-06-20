@@ -27,6 +27,10 @@ add_executable(Test
         SceneLoader.cpp
         collision.h
         Collision.cpp
+        NPC.h
+        NPC.cpp
+        Player.h
+        Player.cpp
 )
 
 target_link_libraries(Test
