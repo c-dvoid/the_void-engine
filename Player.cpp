@@ -39,6 +39,17 @@ void Player::update(float deltaTime, const Uint8* keys, Scene* scene) {
             break;
         }
     }
+
+    // Проверяем, произошла ли коллизия с любыми другими объектами
+    for (auto& obj : scene->objects) {
+        if (!obj.hasCollision) continue;
+        if (intersect(bounds, obj.bounds)) {
+            camera.position = oldPosition;
+            camera.position.y = height;
+            updateBounds();
+            break;
+        }
+    }
 }
 
 void Player::processMouse(float offsetX, float offsetY) {

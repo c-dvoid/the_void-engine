@@ -17,6 +17,8 @@ struct SceneObject {
     glm::mat4 transform;
     glm::vec3 color;
     bool hasTexture;
+    AABB bounds;
+    bool hasCollision;
 };
 
 struct Trigger {

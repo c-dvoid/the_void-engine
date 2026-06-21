@@ -41,19 +41,15 @@ Scene* SceneLoader::load(const std::string& path) {
         }
 
         else if (type == "npc") {
-            std::cout << "Loading NPC..." << std::endl;
             NPC npc;
             std::string modelPath;
             float x, y, z, r, g, b;
             ss >> modelPath >> x >> y >> z >> r >> g >> b;
 
             npc.mesh = new Mesh(modelPath);
-            std::cout << "Mesh created for: " << modelPath << std::endl;
-
             npc.position = glm::vec3(x, y, z);
             npc.color = glm::vec3(r, g, b);
             npc.updateBounds();
-            std::cout << "NPC position set" << std::endl;
 
             // Читаем waypoints
             std::string waypointLine;
@@ -74,18 +70,15 @@ Scene* SceneLoader::load(const std::string& path) {
                 }
             }
 
-            std::cout << "Waypoints read: " << npc.waypoints.size() << std::endl;
             scene->npcs.push_back(new NPC(std::move(npc)));
-            std::cout << "NPC pushed" << std::endl;
-            std::cout << "NPCs loaded: " << scene->npcs.size() << std::endl;
-            std::cout << "Objects loaded: " << scene->objects.size() << std::endl;
         }
 
         else if (type == "model") {
             std::string modelPath;
             float x, y, z, scale;
             float r, g, b;
-            ss >> modelPath >> x >> y >> z >> scale >> r >> g >> b;
+            std::string collisionStr;
+            ss >> modelPath >> x >> y >> z >> scale >> r >> g >> b >> collisionStr;
 
             SceneObject obj;
             obj.mesh = new Mesh(modelPath);
@@ -96,6 +89,11 @@ Scene* SceneLoader::load(const std::string& path) {
             transform = glm::translate(transform, glm::vec3(x, y, z));
             transform = glm::scale(transform, glm::vec3(scale));
             obj.transform = transform;
+
+            // Bounds
+            float halfSize = scale * 0.5f;
+            obj.bounds.min = glm::vec3(x - halfSize, y, z - halfSize);
+            obj.bounds.max = glm::vec3(x + halfSize, y + scale, z + halfSize);
 
             scene->objects.push_back(obj);
         }
