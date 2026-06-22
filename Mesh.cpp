@@ -6,6 +6,10 @@
 #include <iostream>
 
 Mesh::Mesh(const std::string& path) {
+
+    boundsMin = glm::vec3(FLT_MAX);
+    boundsMax = glm::vec3(-FLT_MAX);
+
     Assimp::Importer importer;
 
     const aiScene* scene = importer.ReadFile(path,
@@ -110,6 +114,10 @@ void Mesh::processMesh(aiMesh* mesh, const aiScene* scene,
             v.texCoord = {0.0f, 0.0f};
 
         vertices.push_back(v);
+
+        boundsMin = glm::min(boundsMin, v.position);
+        boundsMax = glm::max(boundsMax, v.position);
+
     }
 
     for (unsigned int i = 0; i < mesh->mNumFaces; i++) {

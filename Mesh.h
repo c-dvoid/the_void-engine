@@ -20,6 +20,10 @@ struct Vertex {
 };
 
 class Mesh {
+public:
+    glm::vec3 boundsMin;
+    glm::vec3 boundsMax;
+
 private:
     unsigned int VAO, VBO, EBO;
 
