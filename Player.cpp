@@ -43,7 +43,11 @@ void Player::update(float deltaTime, const Uint8* keys, Scene* scene) {
     // Проверяем, произошла ли коллизия с любыми другими объектами
     for (auto& obj : scene->objects) {
         if (!obj.hasCollision) continue;
+        std::cout << "Player pos: " << camera.position.x << " " << camera.position.y << " " << camera.position.z << std::endl;
+        std::cout << "Object bounds min: " << obj.bounds.min.x << " " << obj.bounds.min.y << " " << obj.bounds.min.z << std::endl;
+        std::cout << "Object bounds max: " << obj.bounds.max.x << " " << obj.bounds.max.y << " " << obj.bounds.max.z << std::endl;
         if (intersect(bounds, obj.bounds)) {
+            std::cout << "Wall collision!" << std::endl;
             camera.position = oldPosition;
             camera.position.y = height;
             updateBounds();

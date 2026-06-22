@@ -84,6 +84,7 @@ Scene* SceneLoader::load(const std::string& path) {
             obj.mesh = new Mesh(modelPath);
             obj.color = glm::vec3(r, g, b); // Серый по умолчанию
             obj.hasTexture = false;
+            obj.hasCollision = (collisionStr ==  "collision"); // Проверка на наличие коллизий
 
             glm::mat4 transform = glm::mat4(1.0f);
             transform = glm::translate(transform, glm::vec3(x, y, z));
@@ -91,12 +92,30 @@ Scene* SceneLoader::load(const std::string& path) {
             obj.transform = transform;
 
             // Bounds
-            float halfSize = scale * 0.5f;
-            obj.bounds.min = glm::vec3(x - halfSize, y, z - halfSize);
-            obj.bounds.max = glm::vec3(x + halfSize, y + scale, z + halfSize);
+            obj.bounds.min = glm::vec3(x, y, z) + obj.mesh->boundsMin * scale;
+            obj.bounds.max = glm::vec3(x, y, z) + obj.mesh->boundsMax * scale;
 
             scene->objects.push_back(obj);
         }
+
+        else if (type == "wall") {
+            float x, y, z, w, h, d;
+            std::string collisionStr;
+            ss >> x >> y >> z >> w >> h >> d >> collisionStr;
+
+            SceneObject obj;
+            obj.mesh = nullptr;
+            obj.hasTexture = false;
+            obj.hasCollision = true;
+            obj.color = glm::vec3(0.0f);
+            obj.transform = glm::mat4(1.0f);
+
+            obj.bounds.min = glm::vec3(x - w * 0.5f, y - h * 0.5f, z - d * 0.5f);
+            obj.bounds.max = glm::vec3(x + w * 0.5f, y + h * 0.5f, z + d * 0.5f);
+
+            scene->objects.push_back(obj);
+        }
+
         else if (type == "trigger") {
             Trigger trigger;
             std::string radiusStr, actionStr;

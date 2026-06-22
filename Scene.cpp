@@ -35,6 +35,7 @@ void Scene::update(float deltaTime, glm::vec3 playerPos,
 void Scene::draw(Shader& shader) {
     // Объекты сцены
     for (auto& obj : objects) {
+        if (!obj.mesh) continue;
         shader.setMat4("model", obj.transform);
         shader.setVec3("baseColor", obj.color.x, obj.color.y, obj.color.z);
         shader.setBool("hasTexture", obj.hasTexture);
